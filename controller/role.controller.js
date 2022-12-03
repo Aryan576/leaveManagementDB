@@ -57,3 +57,45 @@ exports.getRoles=async(req,res)=>{
                return error
         }
     }
+
+
+  //?update role
+    exports.updateRole=async(req,res)=>{
+        try {
+            const roleid = parseInt(req.params.roleid);
+            const {rolename}=req.body
+          
+            pg.query('update role set rolename=$1 where roleid=$2',[rolename,roleid],(error,results)=>{
+                    console.log(results.affectedRows);
+                    if(error)
+                    {
+                        throw error
+                    }else{
+                       
+                        res.status(200).json(success("role updated", { rolename,roleid }, res.statusCode));
+                    }
+            });  
+          
+        }catch  (error ){
+
+            return error;
+
+        }
+    };
+
+    //?delete role
+    exports.deleteRole=async(req,res)=>{
+        try {
+            const roleid = parseInt(req.params.roleid);
+            pg.query('delete from role where roleid=$1',[roleid],(error,result)=>{
+                if(error)
+                {
+                    throw error
+                }else{
+                    res.status(200).json(success("role deleted", { roleid }, res.statusCode));
+                }
+            });
+    }catch(error){
+
+    }
+}
