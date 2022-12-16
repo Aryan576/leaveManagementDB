@@ -49,7 +49,7 @@ exports.getRoles=async(req,res)=>{
                 {
                     throw error
                 }else{
-                    res.status(200).json(success("List of Role By iD", { data: result.rows }, res.status))
+                    res.status(200).json(success(" Role By iD", { data: result.rows }, res.status))
                 }
             }
         )}catch(error){
@@ -62,7 +62,7 @@ exports.getRoles=async(req,res)=>{
   //?update role
     exports.updateRole=async(req,res)=>{
         try {
-            const roleid = parseInt(req.params.roleid);
+            const roleid = parseInt(req.body.roleid);
             const {rolename}=req.body
           
             pg.query('update role set rolename=$1 where roleid=$2',[rolename,roleid],(error,results)=>{
@@ -86,7 +86,7 @@ exports.getRoles=async(req,res)=>{
     //?delete role
     exports.deleteRole=async(req,res)=>{
         try {
-            const roleid = parseInt(req.params.roleid);
+            const roleid = parseInt(req.body.roleid);
             pg.query('delete from role where roleid=$1',[roleid],(error,result)=>{
                 if(error)
                 {
@@ -99,3 +99,4 @@ exports.getRoles=async(req,res)=>{
 
     }
 }
+
