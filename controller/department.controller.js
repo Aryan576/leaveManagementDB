@@ -1,15 +1,14 @@
-const { success, error, validation } = require("../response");
+const { success, mistake, validation } = require("../response");
 const pg = require("../DB");
 
 //?addDepartments
 exports.addDepartment = async (req, res) => {
   try {
     const{departmentname}=req.body;
-   
+    
     pg.query('insert into department(departmentname) values($1)',[departmentname],(error,result)=>{
         
-      
-        if(error)
+      if(error)
         {
             throw error;
         }else{
@@ -43,14 +42,18 @@ exports.getDepartment=async(req,res)=>{
 exports.getDepartmentById=async(req,res)=>{
     try{
         const departmentid =parseInt(req.params.departmentid);
-        console.log(departmentid);
+     
         pg.query('select * from department where departmentid=$1',[departmentid],(error,result)=>{
-          
-            if(error){
-                throw error;
-            }else{
+            
+            if(result.rows.length!=0){
+           
+             
                 res.status(200).json(success("Department ById",result.rows,res.statusCode))
-            }
+            
+        }else{
+            
+            res.status(400).json(mistake("No Data Found",res.statusCode))
+        }
         })
 
     }catch(error){
@@ -61,7 +64,7 @@ exports.getDepartmentById=async(req,res)=>{
 exports.updateDepartment=async(req,res)=>{
     try{
         const departmentid= parseInt(req.body.departmentid);
-        console.log(departmentid);
+        
         const{departmentname}=req.body
         pg.query('update department set departmentname=$1 where departmentid=$2',[departmentname,departmentid],(error,result)=>{
             if(error){
@@ -81,7 +84,7 @@ exports.deleteDepartment=async(req,res)=>{
     try{
         const departmentid=req.body.departmentid;
         pg.query('delete from department where departmentid=$1',[departmentid],(error,result)=>{
-            console.log(result.rows);
+            
             if(error){
                     throw error;
             }else{

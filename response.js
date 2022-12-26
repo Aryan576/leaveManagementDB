@@ -29,7 +29,7 @@ exports.success = (message, results, statusCode) => {
  * @param   {string} message
  * @param   {number} statusCode
  */
-exports.error = (message, statusCode) => {
+exports.mistake = (message, statusCode) => {
   /**
    * List of common HTTP request code
    * @note  You can add more http request code in here
@@ -44,7 +44,7 @@ exports.error = (message, statusCode) => {
 
   return {
     message,
-    errors,
+    
     code: statusCode,
     error: true,
   };

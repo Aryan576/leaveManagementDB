@@ -21,10 +21,12 @@ app.get('/', (request, response) => {
   const roleRoutes = require('./routes/role.routes')
   const adminRoutes = require('./routes/admin.routes')
   const departmentRoutes =require('./routes/department.routes')
-  
+  const usersRoutes=require('./routes/users.routes')
   app.use('/role', roleRoutes)
   app.use('/admin', adminRoutes)
   app.use('/department',departmentRoutes)
+  app.use('/user', usersRoutes)
+
 
   
   
