@@ -22,3 +22,26 @@ exports.userSignup=async(req,res)=>{
             return error;
     }
 }
+
+//? userLogin 
+
+exports.userLogin = async(req,res)=>{
+    const {email,password}=req.body;
+
+
+  const users= await  pg.query("select * from users where email=$1",[email])
+     
+    
+    
+  const validCredentials = await bcrypt.compare(password,users.rows[0].password)
+    if(validCredentials){
+        res.status(200).json(success("User Login Successfully",users.rows,res.statusCode))
+    }else{
+        res.status(400).json(mistake("Wrong credentials",res.statusCode));
+    }
+
+ 
+ 
+        
+    
+}
