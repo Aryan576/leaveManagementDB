@@ -1,6 +1,7 @@
-const { success, mistake, validation } = require("../response");
+const { success, error, validation } = require("../response");
 const pg = require("../DB");
 var bcrypt = require('bcryptjs');
+const { response } = require("express");
 
 //? User Signup
 exports.userSignup=async(req,res)=>{
@@ -26,21 +27,26 @@ exports.userSignup=async(req,res)=>{
 //? userLogin 
 
 exports.userLogin = async(req,res)=>{
-    const {email,password}=req.body;
-
-
-  const users= await  pg.query("select * from users where email=$1",[email])
-     
-    
-    
-  const validCredentials = await bcrypt.compare(password,users.rows[0].password)
-    if(validCredentials){
-        res.status(200).json(success(users.rows[0].fullname+" Login Successfully",users.rows,res.statusCode))
-    }else{
-        res.status(400).json(mistake("Wrong credentials",res.statusCode));
-    }
-
- }
+  const users= await  pg.query("select * from users where email=$1",[req.body.email])
+  
+      if(users.rows.length<=0)
+     {
+        res.status(404).json(error(req.body.email+"does not exists",res.statusCode))
+     }else{
+  
+       if( await bcrypt.compare(req.body.password,users.rows[0].password)){
+               
+                  return  res.status(200).json(success(users.rows[0].fullname+" Login Successfully",users.rows,res.statusCode))
+                }else{
+                  return   res.status(201).json(error("Wrong credentials",res.statusCode));
+                }
+        } 
+            
+            
+}
+ 
+   
+ 
 
  //? List Users
 exports.usersList = async (req, res) => {
@@ -71,7 +77,7 @@ exports.GetUserById = async (req, res) => {
             if (result.rows.length != 0) {
                 res.status(200).json(success("Users ById", result.rows, res.statusCode))
             } else {
-                res.status(400).json(mistake("No Data Found", res.statusCode))
+                res.status(400).json(error("No Data Found", res.statusCode))
             }
         })
     } catch (error) {
