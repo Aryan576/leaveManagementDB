@@ -31,7 +31,7 @@ exports.getRoles=async(req,res)=>{
                 if(error){
                     throw error
                 }else{
-                    res.status(200).json(success("List of Roles", { data: result.rows }, res.status))
+                    res.status(200).json(success("List of Roles",  {data:result.rows} , res.status))
                 }
         })
     }catch(error){
