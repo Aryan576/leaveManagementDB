@@ -4,22 +4,7 @@ const Role = require("../model/role.model");
 
 //! addroles
 exports.addRole = async (req, res) => {
-  /* try {
-        const {rolename}=req.body
-        pg.query('insert into role(rolename) values($1)',[rolename],(error,result)=>{
-                if(error)
-                {
-                   throw error
-                }else{
-                    res
-                    .status(200)
-                    .json(success("OK", { data: rolename }, res.statusCode));
-                }
-        });
-        
-    } catch (error) {
-        return error;
-    } */
+  
   try {
     const roles = await Role.findOne({
       where: { rolename: req.body.rolename },
@@ -44,83 +29,70 @@ exports.addRole = async (req, res) => {
 
 //? getrols
 exports.getRoles = async (req, res) => {
+
   try {
-    pg.query("select * from role", (error, result) => {
-      if (error) {
-        throw error;
-      } else {
-        res
-          .status(200)
-          .json(success("List of Roles", { data: result.rows }, res.status));
-      }
-    });
+    Role.findAll().then(role=>{
+      console.log(role);
+      res.status(200).json(success("List of Role",role,res.status))
+    })
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
 //?geroles byID
 exports.getRolesByID = async (req, res) => {
-  try {
-    const roleid = parseInt(req.params.roleid);
-    console.log(roleid);
-    pg.query(
-      "select * from role where roleid=$1",
-      [roleid],
-      (error, result) => {
-        if (error) {
-          throw error;
-        } else {
-          res
-            .status(200)
-            .json(success(" Role By iD", { data: result.rows }, res.status));
-        }
-      }
-    );
-  } catch (error) {
-    return error;
-  }
+try{
+    const id = parseInt(req.params.roleid);
+   
+    
+    Role.findOne({where:{roleid:id}}).then(result => {
+      console.log(result);  
+      res.status(200).json(success("list of Role By ID",result,res.statusCode));
+    }).catch(err => {
+        throw err;
+    })
+  
+}catch(err) {
+    throw err;
+}
 };
 
 //?update role
 exports.updateRole = async (req, res) => {
-  try {
-    const roleid = parseInt(req.body.roleid);
-    const { rolename } = req.body;
+ 
 
-    pg.query(
-      "update role set rolename=$1 where roleid=$2",
-      [rolename, roleid],
-      (error, results) => {
-        console.log(results.affectedRows);
-        if (error) {
-          throw error;
-        } else {
-          res
-            .status(200)
-            .json(
-              success("role updated", { rolename, roleid }, res.statusCode)
-            );
-        }
-      }
-    );
-  } catch (error) {
-    return error;
-  }
+  try{
+    Role.update({
+        rolename:req.body.rolename
+    },{
+        where:{roleid:req.body.roleid}
+    }).then(result => { 
+      Role.findOne({where:{roleid:req.body.roleid}}).then(result=>{
+        res.status(200).json(success("Updated Role",result,res.statusCode));
+      })
+       
+    }).catch(err => {
+        throw err;
+    })
+}catch(err) {
+    throw err;
+}
+
 };
 
 //?delete role
 exports.deleteRole = async (req, res) => {
+  
   try {
-    const roleid = parseInt(req.body.roleid);
-    pg.query("delete from role where roleid=$1", [roleid], (error, result) => {
-      if (error) {
-        throw error;
-      } else {
-        res
-          .status(200)
-          .json(success("role deleted", { roleid }, res.statusCode));
-      }
-    });
-  } catch (error) {}
+    const id = parseInt(req.params.roleid);
+    Role.destroy({ where: { roleid: id } }).then(result => {
+      res
+      .status(200)
+      .json(success("role deleted", { roleid }, res.statusCode));
+    })
+} catch (err) {
+    throw err;
+}
+
 };
