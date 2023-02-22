@@ -1,101 +1,85 @@
-const { success, mistake, validation } = require("../response");
-const pg = require("../DB");
+const { success, error, validation } = require("../response");
+const pg = require("../util/DB");
+const Department = require("../model/department.model");
+const { where } = require("sequelize");
 
 //?addDepartments
 exports.addDepartment = async (req, res) => {
   try {
-    const{departmentname}=req.body;
-    
-    pg.query('insert into department(departmentname) values($1)',[departmentname],(error,result)=>{
-        
-      if(error)
-        {
-            throw error;
-        }else{
-            res.status(200).
-            json(success("Department added successfully",{departmentname}, res.statusCode))
-        }
-    })
-
+    const dept = await Department.findOne({
+      where: { deptname: req.body.deptname },
+    });
+    if (dept) {
+      res.status(201).json(error("Department already exists", res.statusCode));
+    } else {
+      await Department.create({ deptname: req.body.deptname })
+        .then((Department) => {
+          res
+            .status(200)
+            .json(success("Department created", Department, res.statusCode));
+        })
+        .catch((error) => {
+          throw error;
+        });
+    }
   } catch (error) {
-    return error
+    throw error;
   }
 };
 //? List of Departments
-exports.getDepartment=async(req,res)=>{
-    try{
-        pg.query('select * from department',(error,result)=>{
-           
-            if(error){
-                throw error;
-            }else{
-                res.status(200).json(success("List of Departments",result.rows, res.statusCode))
-            }
-        })
-    }catch(error){
-        return error;
-    }
-
-}
+exports.getDepartment = async (req, res) => {
+  try {
+    Department.findAll().then((dept) => {
+      res
+        .status(200)
+        .json(success("List of Departments", dept, res.statusCode));
+    });
+  } catch (error) {
+    throw error;
+  }
+};
 
 //? getDepartment BYID
-exports.getDepartmentById=async(req,res)=>{
-    try{
-        const departmentid =parseInt(req.params.departmentid);
-     
-        pg.query('select * from department where departmentid=$1',[departmentid],(error,result)=>{
-            
-            if(result.rows.length!=0){
-           
-             
-                res.status(200).json(success("Department ById",result.rows,res.statusCode))
-            
-        }else{
-            
-            res.status(400).json(mistake("No Data Found",res.statusCode))
-        }
+exports.getDepartmentById = async (req, res) => {
+  try {
+    const deptid = parseInt(req.params.deptid);
+    Department.findOne({ where: { deptid: deptid } })
+      .then((dept) => {
+        res.status(200).json(success("Departmnet by Id", dept, res.statusCode));
+      })
+      .catch((error) => {
+        throw error;
+      });
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.updateDepartment = async (req, res) => {
+  try {
+    Department.update(
+      {
+        deptname: req.body.deptname,
+      },
+      { where: { deptid: req.body.deptid } }
+    ).then(dept=>{
+        Department.findOne({where:{deptid:req.body.deptid}}).then(result=>{
+            res.status(200).json(success("Updated Depatment",result,res.statusCode))
         })
+    });
+  } catch (error) {
+    throw error;
+  }
+};
 
-    }catch(error){
-            return error;
-    }
-}
-
-exports.updateDepartment=async(req,res)=>{
-    try{
-        const departmentid= parseInt(req.body.departmentid);
-        
-        const{departmentname}=req.body
-        pg.query('update department set departmentname=$1 where departmentid=$2',[departmentname,departmentid],(error,result)=>{
-            if(error){
-                throw error;
-            }else{
-                res.status(200).json(success("Department Updated Successfully",{departmentname,departmentid},res.statusCode));
-            }
-        })
-    }catch(error){
-
-        return error;
-
-    }
-}
-
-exports.deleteDepartment=async(req,res)=>{
-    try{
-        const departmentid=req.body.departmentid;
-        pg.query('delete from department where departmentid=$1',[departmentid],(error,result)=>{
-            
-            if(error){
-                    throw error;
-            }else{
-                res.status(200).json(success("Deleted Department",result.rows, res.statusCode))
-            }
-        })
-    }catch(error){
-
-        return error;
-
-    }
-}
-
-
+exports.deleteDepartment = async (req, res) => {
+  try {
+    const deptid = req.body.deptid;
+    Department.destroy({where:{deptid:deptid}}).then(result=>{
+        res.status(200).json(success("department deleted successfully",deptid,res.statusCode))
+    })
+   
+  } catch (error) {
+    throw error;
+  }
+};
