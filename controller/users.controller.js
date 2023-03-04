@@ -1,107 +1,189 @@
 const { success, error, validation } = require("../response");
-const pg = require("../DB");
-var bcrypt = require('bcryptjs');
-const { response } = require("express");
+const pg = require("../util/DB");
+var bcrypt = require("bcryptjs");
+const User = require("../model/users.model");
 
 //? User Signup
-exports.userSignup=async(req,res)=>{
-    
-    
-    try{
-        const password = await  bcrypt.hash(req.body.password,10);
-        const {fullname,dob,gender,email,address,roleid,status,deptid,pincode,phonenumber,cityid}=req.body;
-        
-        pg.query('insert into users(fullname,dob,gender,email,password,address,roleid,status,deptid,pincode,phonenumber,cityid) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)',[fullname,dob,gender,email,password,address,roleid,status,deptid,pincode,phonenumber,cityid],(error,result)=>{
-           
-            if(error){
-                throw error;
-            }else{
-                res.status(200).json(success("user Signup sucesffuly",{fullname,dob,gender,email,password,address,roleid,status,deptid,pincode,phonenumber,cityid},res.statusCode));
-            }
+exports.userSignup = async (req, res) => {
+  try {
+    const {
+      fullname,
+      dob,
+      number,
+      gender,
+      email,
+      password,
+      address,
+      city,
+      state,
+      pincode,
+      roleid,
+      deptid,
+    } = req.body;
+
+    const users = await User.findOne({ where: { email: email } });
+    if (users) {
+      res
+        .status(200)
+        .json(success("User Already exits", users, res.statusCode));
+    } else {
+      User.create({
+        fullname: fullname,
+        dob: dob,
+        number: number,
+        gender: gender,
+        email: email,
+        password: await bcrypt.hash(password, 10),
+        address: address,
+        city: city,
+        state: state,
+        pincode: pincode,
+        roleid: roleid,
+        deptid: deptid,
+      })
+        .then((result) => {
+          res
+            .status(200)
+            .json(success("Users Added successfully", result, res.statusCode));
         })
-    }catch(error){
-            return error;
+        .catch((error) => {
+          throw error;
+        });
     }
-}
+  } catch (error) {
+    return error;
+  }
+};
 
-//? userLogin 
+//? userLogin
 
-exports.userLogin = async(req,res)=>{
-  const users= await  pg.query("select * from users where email=$1",[req.body.email])
-  
-      if(users.rows.length<=0)
-     {
-        res.status(404).json(error(req.body.email+"does not exists",res.statusCode))
-     }else{
-  
-       if( await bcrypt.compare(req.body.password,users.rows[0].password)){
-               
-                  return  res.status(200).json(success(users.rows[0].fullname+" Login Successfully",users.rows,res.statusCode))
-                }else{
-                  return   res.status(201).json(error("Wrong credentials",res.statusCode));
-                }
-        } 
-            
-            
-}
- 
-   
- 
+exports.userLogin = async (req, res) => {
+  const users = await pg.query("select * from users where email=$1", [
+    req.body.email,
+  ]);
 
- //? List Users
-exports.usersList = async (req, res) => {
-
-    try {
-
-        pg.query('select * from users', (error, result) => {
-
-            if (error) {
-                throw error;
-            } else {
-                res.status(200).json(success("List of users", { data: result.rows }, res.statusCode));
-            }
-        })
-    } catch (error) {
-        return error;
+  if (users.rows.length <= 0) {
+    res
+      .status(404)
+      .json(error(req.body.email + "does not exists", res.statusCode));
+  } else {
+    if (await bcrypt.compare(req.body.password, users.rows[0].password)) {
+      return res
+        .status(200)
+        .json(
+          success(
+            users.rows[0].fullname + " Login Successfully",
+            users.rows,
+            res.statusCode
+          )
+        );
+    } else {
+      return res.status(201).json(error("Wrong credentials", res.statusCode));
     }
-}
+  }
+};
+
+//? List Users
+exports.userList = async (req, res) => {
+  try {
+    User.findAll()
+      .then((users) => {
+        res.status(200).json(success("List of Users", users, res.statusCode));
+      })
+      .catch((error) => {
+        res.status(400).json(error("no users found", res.statusCode));
+      });
+  } catch (error) {
+    throw error;
+  }
+};
 
 //? Get User by id
 exports.GetUserById = async (req, res) => {
-
-    try {
-        const userid = parseInt(req.params.userid)
-
-        pg.query('select * from users where userid = $1', [userid], (error, result) => {
-
-            if (result.rows.length != 0) {
-                res.status(200).json(success("Users ById", result.rows, res.statusCode))
-            } else {
-                res.status(400).json(error("No Data Found", res.statusCode))
-            }
-        })
-    } catch (error) {
-        return error;
-    }
-}
+  try {
+    const userid = parseInt(req.params.userid);
+    User.findOne({ where: { userid: userid } })
+      .then((user) => {
+        if (!user) {
+          res.status(404).json(error("no user found", res.statusCode));
+        } else {
+          res.status(200).json(success("User by ID", user, res.statusCode));
+        }
+      })
+      .catch((error) => {
+        throw error;
+      });
+  } catch (error) {
+    return error;
+  }
+};
 
 //? User Update
-exports.userUpdate = async (req, res) => {
+exports.updateUser = async (req, res) => {
+  try {
+    const {
+      userid,
+      fullname,
+      dob,
+      number,
+      gender,
+      email,
+      password,
+      address,
+      city,
+      state,
+      pincode,
+      roleid,
+      deptid,
+    } = req.body;
+    await User.update(
+      {
+        fullname: fullname,
+        dob: dob,
+        number: number,
+        gender: gender,
+        email: email,
+        password: await bcrypt.hash(password, 10),
+        address: address,
+        city: city,
+        state: state,
+        pincode: pincode,
+        roleid: roleid,
+        deptid: deptid,
+      },
+      { where: { userid: userid } }
+    ).then((user) => {
+      User.findOne({ where: { userid: userid } }).then((updateUser) => {
+        if (updateUser) {
+          res
+            .status(200)
+            .json(success("Updated user data", updateUser, res.statusCode));
+        } else {
+          res.status(400).json(error("user not updated", res.statusCode));
+        }
+      });
+    });
+  } catch (error) {
+    throw error;
+  }
+};
 
+exports.deleteUser = async(req,res)=>{
     try {
-        const userid = parseInt(req.body.userid)
-        const password = await bcrypt.hash(req.body.password, 10);
-        const { fullname, phoneno, birthdate, gender, email, address, cityid, pincode, roleid, status, departmentid } = req.body;
-
-        pg.query('update users set fullname=$1,phoneno=$2,birthdate=$3,gender=$4,email=$5,password=$6,address=$7,cityid=$8,pincode=$9,roleid=$10,status=$11,departmentid=$12 where userid=$13', [fullname, phoneno, birthdate, gender, email, password, address, cityid, pincode, roleid, status, departmentid,userid], (error, result) => {
-
-            if (error) {
-                throw error;
-            } else {
-                res.status(200).json(success("user Updated sucesffuly", { fullname, phoneno, birthdate, gender, email, password, address, cityid, pincode, roleid, status, departmentid,userid }, res.statusCode));
-            }
+      await  User.update({
+            isdeleted:1
+        },{where:{userid:req.body.userid}}).then(user=>{
+                User.findOne({where:{userid:req.body.userid,isdeleted:1}}).then(deletedUser=>{
+                   if(!deletedUser){
+                        res.status(400).json("Deleted user not found",res.statuscode);
+                   }else{
+                    res.status(200).json(success("deleted user",deletedUser,res.statuscode))
+                   }
+                   
+                   
+                })
         })
     } catch (error) {
-        return error;
+        throw error;
     }
 }

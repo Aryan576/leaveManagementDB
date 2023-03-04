@@ -3,13 +3,13 @@ const express = require('express')
 const router = express.Router()
 
 
-const controller = require('../controller/users.controller')
-router.post('/userSignup',controller.userSignup )
+ const controller = require('../controller/users.controller') 
+  router.post('/userSignup',controller.userSignup )
 router.post('/userLogin',controller.userLogin)
-router.get('/userList',controller.usersList)
+router.get('/userList',controller.userList)
 router.get('/userById/:userid',controller.GetUserById)
-router.get('/updateUser',controller.userUpdate)
-
+router.put('/updateUser',controller.updateUser)
+ router.delete('/deleteUser',controller.deleteUser)
 
 
 module.exports=router
