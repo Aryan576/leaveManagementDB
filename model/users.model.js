@@ -23,6 +23,10 @@ const User=sequelize.define('user',{
                 type:Sequelize.DATEONLY,
                 allowNull: false,
                 require:true
+        },gender:{
+            type:Sequelize.STRING,
+            allowNull: false,
+                require:true
         },email:{
             type:Sequelize.STRING,
             allowNull: false,

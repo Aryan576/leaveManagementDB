@@ -58,29 +58,23 @@ exports.userSignup = async (req, res) => {
 //? userLogin
 
 exports.userLogin = async (req, res) => {
-  const users = await pg.query("select * from users where email=$1", [
-    req.body.email,
-  ]);
-
-  if (users.rows.length <= 0) {
-    res
-      .status(404)
-      .json(error(req.body.email + "does not exists", res.statusCode));
-  } else {
-    if (await bcrypt.compare(req.body.password, users.rows[0].password)) {
-      return res
-        .status(200)
-        .json(
-          success(
-            users.rows[0].fullname + " Login Successfully",
-            users.rows,
-            res.statusCode
-          )
-        );
-    } else {
-      return res.status(201).json(error("Wrong credentials", res.statusCode));
+    try {
+      const user= await User.findOne({where:{email:req.body.email,isdeleted:0}})
+     
+      if(user){
+        const validatePassword = await bcrypt.compare(req.body.password,user.password)
+        if(validatePassword){
+            res.status(200).json(success("User login successful", user, res.statusCode))
+        }else{
+            res.status(401).json(error("Invalid password",res.statusCode))
+        }
+      }else{
+        res.status(404).json(error("User Not Found",res.statusCode));
+      }
+        
+    } catch (error) {
+        throw error;
     }
-  }
 };
 
 //? List Users
