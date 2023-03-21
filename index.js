@@ -38,7 +38,7 @@ app.use('/user', usersRoutes)
 
 
 sequelize
-  .sync({force: true})
+  .sync()
   .then((res) => {
     // console.log(res);
     app.listen(port, () => {
