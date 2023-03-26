@@ -7,7 +7,9 @@ const controller= require('../controller/students.controller')
 router.post('/addStudents',controller.addStudent)
 router.post('/studentsLogin',controller.studentLogin)
 router.get('/getStudent',controller.getStudentList)
-router.get('/getStudentById/:studentid',controller.getStudentById)
+router.get('/getStudentById/:studid',controller.getStudentById)
+router.put('/updateStudent',controller.updateStudent)
+router.delete('/deleteStudent',controller.deleteStudent)
 
 
 

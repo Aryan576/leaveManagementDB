@@ -20,27 +20,23 @@ app.get("/", (request, response) => {
 });
 
 const sequelize = require("./util/DB");
-
 const roleRoutes = require("./routes/role.routes");
-
 const departmentRoutes = require("./routes/department.routes");
-/* const states=require("./routes/state.routes")
-const city=require("./routes/city.routes") */
-   const usersRoutes=require('./routes/users.routes')
- /* const studentRoutes=require('./routes/students.routes') */
+const usersRoutes=require('./routes/users.routes')
+const studentRoutes=require('./routes/students.routes') 
+const statusRoutes=require('./routes/status.routes')
 app.use("/role", roleRoutes);
 app.use("/department", departmentRoutes);
-/* app.use("/states",states)
-app.use("/city", city); */
 app.use('/user', usersRoutes)
- /* app.use('/students',studentRoutes)
- */
+app.use('/students',studentRoutes);
+app.use('/status',statusRoutes);
+ 
 
 
 sequelize
   .sync()
   .then((res) => {
-    // console.log(res);
+   
     app.listen(port, () => {
       console.log(`App running on port http://localhost:${port}`);
     });
