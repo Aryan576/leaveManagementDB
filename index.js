@@ -25,11 +25,13 @@ const departmentRoutes = require("./routes/department.routes");
 const usersRoutes=require('./routes/users.routes')
 const studentRoutes=require('./routes/students.routes') 
 const statusRoutes=require('./routes/status.routes')
+const leaveRoutes=require('./routes/leave.routes')
 app.use("/role", roleRoutes);
 app.use("/department", departmentRoutes);
 app.use('/user', usersRoutes)
 app.use('/students',studentRoutes);
 app.use('/status',statusRoutes);
+app.use('/leave', leaveRoutes);
  
 
 
